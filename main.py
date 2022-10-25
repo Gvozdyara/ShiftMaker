@@ -6,6 +6,7 @@ import logging
 
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
+from kivy.app import App
 
 
 '''
@@ -70,3 +71,26 @@ class GeneralShiftholder(BoxLayout):
         '''read presaved hours from hours.json'''
         with open(self.hours_file, "r") as f:
             return json.load(f)[0]
+
+
+class MainApp(App):
+    def __init__(self):
+
+        super(MainApp, self).__init__()
+        self.file = os.path.join("data", "data.json")
+        self.data = dict()
+        self.hours = list()
+        self.operators = list()
+
+        self.read_data()
+        pass
+
+    def read_data(self):
+        with open(self.file, "r", encoding="utf8") as f:
+            self.data = json.load(f)[0]
+
+        self.hours = self.data["hours"]
+        self.operators = self.data["operators"]
+
+    def build(self):
+        pass
