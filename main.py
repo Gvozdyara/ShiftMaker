@@ -4,9 +4,10 @@ import os
 import json
 import logging
 
+from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
-from kivy.app import App
+from kivy.uix.textinput import TextInput
 
 
 '''
@@ -31,8 +32,110 @@ logger.addHandler(handle)
 handle.setFormatter(formatter)
 
 
+class ShiftCell(TextInput):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.data_holder = kwargs.get("data_holder")
+        self.day = kwargs.get("day")
+        self.hour_cell = kwargs.get("hour_cell")
+        self.role = kwargs.get("role")
 
-class GeneralShiftholder(BoxLayout):
+    def submit_data(self):
+        operator = str(self.text).strip().upper()
+        self.data_holder.operators[operator].configure_day(
+            day=self.day,
+            hours_roles=self.hours_roles)
+
+
+class Operator:
+    def __init__(self, *args, **kwargs):
+
+        self.name = kwargs.get("name")
+        self.general_shift = {
+            1: "",
+            2: "",
+            3: "",
+            4: "",
+            5: "",
+            6: "",
+            7: "",
+            8: "",
+            9: "",
+            10: "",
+            11: "",
+            12: "",
+            13: "",
+            14: "",
+            15: "",
+            16: "",
+            17: "",
+            18: "",
+            19: "",
+            20: "",
+            21: "",
+            22: "",
+            23: "",
+            24: "",
+            25: "",
+            26: "",
+            27: "",
+            28: "",
+            29: "",
+            30: "",
+            31: ""
+        }
+        self.quantity_messager_roles = int(kwargs.get("mess_cells"), 0)
+        self.quantity_calls_roles = int(kwargs.get("calls_cells"), 0)
+        self.quantity_second_line = int(kwargs.get("second_line"), 0)
+        #  month shift = dict(1:[(hours, role),])
+        self.month_shift = {
+            1: [],
+            2: [],
+            3: [],
+            4: [],
+            5: [],
+            6: [],
+            7: [],
+            8: [],
+            9: [],
+            10: [],
+            11: [],
+            12: [],
+            13: [],
+            14: [],
+            15: [],
+            16: [],
+            17: [],
+            18: [],
+            19: [],
+            20: [],
+            21: [],
+            22: [],
+            23: [],
+            24: [],
+            25: [],
+            26: [],
+            27: [],
+            28: [],
+            29: [],
+            30: [],
+            31: []
+        }
+
+    def configure_day(self, **kwargs):
+        day = kwargs.get("day")
+        hours_roles = kwargs.get("hours_role", [])
+
+        self.month_shift[day].append(hours_roles)
+
+    def configure_general_shift(self, **kwargs):
+        self.general_shift = kwargs
+
+    def increment_usage(self, *args):
+        pass
+
+
+class GeneralShiftHolder(BoxLayout):
     ''' Layout to hold month general shift '''
 
     def __init__(self, **kwargs):
@@ -67,20 +170,18 @@ class GeneralShiftholder(BoxLayout):
         '''return days of current month'''
         return calendar.TextCalendar().monthdayscalendar(self.year, self.month)
 
-    def read_hours(self):
-        '''read presaved hours from hours.json'''
-        with open(self.hours_file, "r") as f:
-            return json.load(f)[0]
 
-
-class MainApp(App):
+class MainLayout(BoxLayout):
     def __init__(self):
+        super().__init__()
 
-        super(MainApp, self).__init__()
+        self.general_shift_holder = ObjectProperty(None)
+
         self.file = os.path.join("data", "data.json")
         self.data = dict()
         self.hours = list()
         self.operators = list()
+        self.shift = dict()
 
         self.read_data()
         pass
@@ -90,7 +191,16 @@ class MainApp(App):
             self.data = json.load(f)[0]
 
         self.hours = self.data["hours"]
-        self.operators = self.data["operators"]
+        self.operators = \
+            {operator: Operator(name=operator)
+             for operator in self.data["operators"]}
+        self.shift = self.data["shift"][0]
+
+
+class MainApp(App):
+    def __init__(self):
+
+        super(MainApp, self).__init__()
 
     def build(self):
-        pass
+        return MainLayout()
