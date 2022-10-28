@@ -32,7 +32,21 @@ logger.addHandler(handle)
 handle.setFormatter(formatter)
 
 
-class ShiftCell(TextInput):
+class GeneralShiftCell(TextInput):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.data_holder = kwargs.get("data_holder")
+        self.day = kwargs.get("day")
+        self.hour_cell = kwargs.get("hour_cell")
+
+    def submit_data(self):
+        operator = str(self.text).strip().upper()
+        self.data_holder.operators[operator].configure_day(
+            day=self.day,
+            hours_roles=self.hours_roles)
+
+
+class DetailedShiftCell(TextInput):
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.data_holder = kwargs.get("data_holder")
@@ -84,9 +98,9 @@ class Operator:
             30: "",
             31: ""
         }
-        self.quantity_messager_roles = int(kwargs.get("mess_cells"), 0)
-        self.quantity_calls_roles = int(kwargs.get("calls_cells"), 0)
-        self.quantity_second_line = int(kwargs.get("second_line"), 0)
+        self.quantity_messager_roles = int(kwargs.get("mess_cells", 0))
+        self.quantity_calls_roles = int(kwargs.get("calls_cells", 0))
+        self.quantity_second_line = int(kwargs.get("second_line", 0))
         #  month shift = dict(1:[(hours, role),])
         self.month_shift = {
             1: [],
@@ -139,6 +153,9 @@ class GeneralShiftHolder(BoxLayout):
     ''' Layout to hold month general shift '''
 
     def __init__(self, **kwargs):
+        logger.debug(f'{kwargs=} on GeneralShiftHolder.__init__')
+        self.shift = list()
+        self._parent = kwargs.get("parent")
         self.month = kwargs.get("month", datetime.now().month + 1)
         for_next_year = False
 
@@ -157,19 +174,36 @@ class GeneralShiftHolder(BoxLayout):
 
         self.month_days = self.current_month_days()
 
-        self.shift = self.construct_empty_shift()
-        logger.debug(f'{self.construct_empty_shift()=}')
+        self.construct_empty_shift()
+        logger.debug(f'{self.shift=}')
+
+        super().__init__()
+        general_shift_grid = ObjectProperty(None)
+        self.general_shift_grid.bind(minimum_height=self.general_shift_grid.setter('height'))
+        self.populate()
 
     def construct_empty_shift(self):
-        ''' return {[day, hour_step]: None}'''
-        for day in self.month_days:
-            for time_period in self.read_hours():
-                self.shift[(day, time_period)] = None
+        ''' return {[day, hour_step}'''
+        for time_period in self._parent.hours:
+            for day in self.month_days:
+                self.shift.append({"day": day,
+                                   "time_period": time_period,
+                                   "operator": ""})
 
     def current_month_days(self):
         '''return days of current month'''
-        return calendar.TextCalendar().monthdayscalendar(self.year, self.month)
+        days = list()
+        for i in calendar.TextCalendar().monthdayscalendar(self.year, self.month):
+            days.extend(i)
+        return days
 
+    def populate(self):
+        for i in self.shift:
+            self.general_shift_grid.add_widget(GeneralShiftCell(
+                data_holder=self._parent,
+                day=i["day"],
+                hour_cell=i["time_period"]
+            ))
 
 class MainLayout(BoxLayout):
     def __init__(self):
@@ -184,7 +218,7 @@ class MainLayout(BoxLayout):
         self.shift = dict()
 
         self.read_data()
-        pass
+        self.add_widget(GeneralShiftHolder(parent=self))
 
     def read_data(self):
         with open(self.file, "r", encoding="utf8") as f:
@@ -204,3 +238,7 @@ class MainApp(App):
 
     def build(self):
         return MainLayout()
+
+
+if __name__ == "__main__":
+    MainApp().run()
