@@ -181,7 +181,9 @@ class GeneralShiftHolder(BoxLayout):
 
         super().__init__()
         general_shift_grid = ObjectProperty(None)
-        self.general_shift_grid.bind(minimum_height=self.general_shift_grid.setter('height'))
+
+        self.general_shift_grid.bind(
+            minimum_width=self.general_shift_grid.setter('width'))
         self.populate()
 
     def construct_empty_shift(self):
@@ -204,6 +206,7 @@ class GeneralShiftHolder(BoxLayout):
         for i in self.shift:
             self.hour_label_if_needed(current_hour_cell, i)
             current_hour_cell = i["hour_cell"]
+            logger.debug(f'{type(i["hour_cell"])=}')
 
             self.general_shift_grid.add_widget(GeneralShiftCell(
                 data_holder=self._parent,
@@ -213,6 +216,7 @@ class GeneralShiftHolder(BoxLayout):
 
     def hour_label_if_needed(self, current_hour_cell: list, data: dict):
         hour_cell = data["hour_cell"]
+        logger.debug(f'{type(hour_cell)=}')
         if str(hour_cell) != str(current_hour_cell):
             self.general_shift_grid.add_widget(
                 HourCellLabel(hour_cell=hour_cell))
@@ -238,6 +242,7 @@ class MainLayout(BoxLayout):
             self.data = json.load(f)[0]
 
         self.hours = self.data["hours"]
+        logger.debug(f'{type(self.hours)=}')
         self.operators = \
             {operator: Operator(name=operator)
              for operator in self.data["operators"]}

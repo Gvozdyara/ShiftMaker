@@ -12,13 +12,15 @@
     orientation: "vertical"
     ScrollView:
         size: self.size
+        do_scroll_x: True
+        do_scroll_y: False
         GridLayout:
             id: general_shift_grid
-            col_default_width: dp(20)
+            col_default_width: dp(40)
             row_default_height: dp(30)
             cols: len(root.month_days) + 1
-            size_hint_y: None
-            height: self.minimum_height
+            size_hint_x: None
+            width: self.minimum_width
 
 
 <MainLayout>:
