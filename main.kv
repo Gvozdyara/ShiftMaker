@@ -1,4 +1,10 @@
+#: import HourCellLabel minor_widgets.HourCellLabel
 
+
+
+<HourCellLabel>:
+    height: dp(20)
+    size_hint_x: 2
 
 
 <GeneralShiftHolder>:
@@ -9,8 +15,8 @@
         GridLayout:
             id: general_shift_grid
             col_default_width: dp(20)
-            row_default_height: dp(20)
-            cols: len(root.month_days)
+            row_default_height: dp(30)
+            cols: len(root.month_days) + 1
             size_hint_y: None
             height: self.minimum_height
 
@@ -20,6 +26,7 @@
     Label:
         text: "Detailed shift"
         size_hint_y: .1
+
 
 
 

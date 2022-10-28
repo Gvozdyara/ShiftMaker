@@ -9,6 +9,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.uix.textinput import TextInput
 
+from minor_widgets import HourCellLabel
+
 
 '''
 1. Make calendar
@@ -184,10 +186,10 @@ class GeneralShiftHolder(BoxLayout):
 
     def construct_empty_shift(self):
         ''' return {[day, hour_step}'''
-        for time_period in self._parent.hours:
+        for hour_cell in self._parent.hours:
             for day in self.month_days:
                 self.shift.append({"day": day,
-                                   "time_period": time_period,
+                                   "hour_cell": hour_cell,
                                    "operator": ""})
 
     def current_month_days(self):
@@ -198,12 +200,23 @@ class GeneralShiftHolder(BoxLayout):
         return days
 
     def populate(self):
+        current_hour_cell = []
         for i in self.shift:
+            self.hour_label_if_needed(current_hour_cell, i)
+            current_hour_cell = i["hour_cell"]
+
             self.general_shift_grid.add_widget(GeneralShiftCell(
                 data_holder=self._parent,
                 day=i["day"],
-                hour_cell=i["time_period"]
+                hour_cell=i["hour_cell"]
             ))
+
+    def hour_label_if_needed(self, current_hour_cell: list, data: dict):
+        hour_cell = data["hour_cell"]
+        if str(hour_cell) != str(current_hour_cell):
+            self.general_shift_grid.add_widget(
+                HourCellLabel(hour_cell=hour_cell))
+
 
 class MainLayout(BoxLayout):
     def __init__(self):
